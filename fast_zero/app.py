@@ -97,13 +97,13 @@ def delete_user(user_id: int, session: Session = Depends(get_session)):
     return {'message': 'User deleted'}
 
 
-# @app.get('/users/{user_id}', response_model=UserPublic)
-# def find_user(user_id: int):
-#     if user_id > len(database) or user_id < 1:
-#         raise HTTPException(
-#             status_code=HTTPStatus.NOT_FOUND, detail='User not found'
-#         )
+@app.get('/users/{user_id}', response_model=UserPublic)
+def find_user(user_id: int, session: Session = Depends(get_session)):
+    db_user = session.scalar(select(User).where(User.id == user_id))
 
-#     user = database[user_id - 1]
+    if not db_user:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND, detail='User not found'
+        )
 
-#     return user
+    return db_user
