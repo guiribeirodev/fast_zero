@@ -60,17 +60,18 @@ def test_update_user(client, user, token):
     }
 
 
-# def test_update_user_not_found(client):
-#     response = client.put(
-#         '/users/100',
-#         json={
-#             'username': 'bob',
-#             'email': 'bob@example.com',
-#             'password': 'mynewpassword',
-#         },
-#     )
-#     assert response.status_code == HTTPStatus.NOT_FOUND
-#     assert response.json() == {'detail': 'User not found'}
+def test_update_user_without_permission(client, token):
+    response = client.put(
+        '/users/10000000000000',
+        headers={'Authorization': f'Bearer {token}'},
+        json={
+            'username': 'bob',
+            'email': 'bob@example.com',
+            'password': 'mynewpassword',
+        },
+    )
+    assert response.status_code == HTTPStatus.FORBIDDEN
+    assert response.json() == {'detail': 'Not enough permissions'}
 
 
 def test_update_integrity_error(client, user, token):
@@ -109,77 +110,77 @@ def test_delete_user(client, user, token):
     assert response.json() == {'message': 'User deleted'}
 
 
-# def test_delete_user_not_found(client):
-#     response = client.delete('/users/100')
+def test_delete_user_without_permission(client, token):
+    response = client.delete(
+        '/users/100', headers={'Authorization': f'Bearer {token}'}
+    )
 
-#     assert response.status_code == HTTPStatus.NOT_FOUND
-#     assert response.json() == {'detail': 'User not found'}
-
-
-# def test_find_user(client, user):
-#     response = client.get('/users/1')
-
-#     assert response.status_code == HTTPStatus.OK
-#     assert response.json() == {
-#         'id': 1,
-#         'username': 'Teste',
-#         'email': 'teste@test.com',
-#     }
+    assert response.status_code == HTTPStatus.FORBIDDEN
+    assert response.json() == {'detail': 'Not enough permissions'}
 
 
-# def test_find_user_not_found(client):
-#     response = client.get('/users/100')
+def test_find_user(client, user):
+    response = client.get('/users/1')
 
-#     assert response.status_code == HTTPStatus.NOT_FOUND
-#     assert response.json() == {'detail': 'User not found'}
-
-
-# def test_create_user_with_username_already(client, user):
-#     client.post(
-#         '/users',
-#         json={
-#             'username': 'fausto',
-#             'email': 'fausto@example.com',
-#             'password': 'secret',
-#         },
-#     )
-
-#     response_other_user = client.post(
-#         '/users',
-#         json={
-#             'username': 'fausto',
-#             'email': 'fausto2@example.com',
-#             'password': 'secret',
-#         },
-#     )
-
-#     assert response_other_user.status_code == HTTPStatus.BAD_REQUEST
-#     assert response_other_user.json() == {
-# 'detail': 'Username already exists'}
+    assert response.status_code == HTTPStatus.OK
+    assert response.json() == {
+        'id': 1,
+        'username': 'Teste',
+        'email': 'teste@test.com',
+    }
 
 
-# def test_create_user_with_email_already(client, user):
-#     client.post(
-#         '/users',
-#         json={
-#             'username': 'fausto',
-#             'email': 'fausto@example.com',
-#             'password': 'secret',
-#         },
-#     )
+def test_find_user_not_found(client):
+    response = client.get('/users/100')
 
-#     response_other_user = client.post(
-#         '/users',
-#         json={
-#             'username': 'fausto2',
-#             'email': 'fausto@example.com',
-#             'password': 'secret',
-#         },
-#     )
+    assert response.status_code == HTTPStatus.NOT_FOUND
+    assert response.json() == {'detail': 'User not found'}
 
-#     assert response_other_user.status_code == HTTPStatus.BAD_REQUEST
-#     assert response_other_user.json() ==
-# {'detail': 'Email already exists'}
+
+def test_create_user_with_username_already(client, user):
+    client.post(
+        '/users',
+        json={
+            'username': 'fausto',
+            'email': 'fausto@example.com',
+            'password': 'secret',
+        },
+    )
+
+    response_other_user = client.post(
+        '/users',
+        json={
+            'username': 'fausto',
+            'email': 'fausto2@example.com',
+            'password': 'secret',
+        },
+    )
+
+    assert response_other_user.status_code == HTTPStatus.BAD_REQUEST
+    assert response_other_user.json() == {'detail': 'Username already exists'}
+
+
+def test_create_user_with_email_already(client, user):
+    client.post(
+        '/users',
+        json={
+            'username': 'fausto',
+            'email': 'fausto@example.com',
+            'password': 'secret',
+        },
+    )
+
+    response_other_user = client.post(
+        '/users',
+        json={
+            'username': 'fausto2',
+            'email': 'fausto@example.com',
+            'password': 'secret',
+        },
+    )
+
+    assert response_other_user.status_code == HTTPStatus.BAD_REQUEST
+    assert response_other_user.json() == {'detail': 'Email already exists'}
 
 
 def test_get_token(client, user):
