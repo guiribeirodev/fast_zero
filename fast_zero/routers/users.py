@@ -32,7 +32,7 @@ def read_users(
 ):
     users = session.scalars(
         select(User).offset(filter_users.offset).limit(filter_users.limit)
-        ).all()
+    ).all()
     return {'users': users}
 
 
