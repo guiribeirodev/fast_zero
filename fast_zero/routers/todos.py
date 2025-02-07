@@ -93,9 +93,7 @@ def update_todo(
 
 
 @router.delete('/{todo_id}', response_model=Message)
-def delete_todo(
-    todo_id: int, session: Session, user: CurrentUser
-):
+def delete_todo(todo_id: int, session: Session, user: CurrentUser):
     todo = session.scalar(
         select(Todo).where(Todo.user_id == user.id, Todo.id == todo_id)
     )
